@@ -6,7 +6,19 @@ import { createTodo } from '../../businessLogic/todos'
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
-  const newTodo: CreateTodoRequest = JSON.parse(event.body)
+  const newTodo: CreateTodoRequest = JSON.parse(event.body);
+
+  if (!newTodo.name) {
+    return{
+      statusCode:400,
+      headers:{
+        'Access-Control-Allow-Origin': "*"
+      },
+      body: JSON.stringify({
+        error: 'Task name is required'
+      })
+    }
+  }
 
   const authorization = event.headers.Authorization;
   const split = authorization.split(' ');

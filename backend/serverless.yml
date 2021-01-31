@@ -15,6 +15,10 @@ provider:
   name: aws
   runtime: nodejs12.x
 
+  tracing:
+    lambda: true
+    apiGateway: true
+
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
 
@@ -58,6 +62,10 @@ functions:
           cors: true
           reqValidatorName: RequestBodyValidator
           authorizer: Auth
+          request:
+            # Schema that will be used to validate incoming requests
+            schema:
+              application/json: ${file(models/create-todo-request.json)}
           documentation:
             summary: Create a new todo
             description: Create a new todo
@@ -80,6 +88,11 @@ functions:
           cors: true
           reqValidatorName: RequestBodyValidator
           authorizer: Auth
+          documentation:
+            summary: Update a todo
+            description: Update a todo
+            requestModels:
+              'application/json': UpdateTodo
     iamRoleStatementsName: ${self:provider.environment.PROJECT_NAME}-update-todo-${self:provider.stage}
     iamRoleStatements:
       - Effect: Allow
@@ -126,17 +139,22 @@ functions:
           - s3:PutObject
         Resource: arn:aws:s3:::${self:provider.environment.ATTACHMENTS_S3_BUCKET}/*
 
+
 custom:
   documentation:
   api:
     info:
       version: v1.0.0
-      title: Udagram API
+      title: Todos API
       description: Serverless application for images sharing
   models:
     - name: CreateTodo
       contentType: application/json
-      schema: ${file(models/create-group-request.json)}
+      schema: ${file(models/create-todo-request.json)}
+    - name: UpdateTodo
+      contentType: application/json
+      schema: ${file(models/update-todo-request.json)}
+
 
 resources:
   Resources:
